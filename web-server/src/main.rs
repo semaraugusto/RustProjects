@@ -4,6 +4,7 @@ use std::io::*;
 use std::fs;
 use std::thread;
 use std::time::Duration;
+use std::str;
 // use lib::ThreadPool;
 // pub mod src::ThreadPool;
 mod lib;
@@ -25,16 +26,17 @@ fn main() {
 fn handle_connection(mut stream: TcpStream) {
     let mut buffer = [0; 1024];
     stream.read(&mut buffer).unwrap();
-    let get_root_route = b"GET / HTTP/1,1\r\n";
-    let get_sleep_route = b"GET /sleep HTTP/1,1\r\n";
+    let get_root_route = b"GET / HTTP/1.1\r\n";
+    let get_sleep_route = b"GET /sleep HTTP/1.1\r\n";
 
+    println!("{}", String::from_utf8_lossy(&buffer));
     let (status_line, filename) = if buffer.starts_with(get_root_route) {
-        ("HTTP1/1.1 200 OK", "hello.html")
+        ("HTTP/1.1 200 OK", "hello.html")
     } else if buffer.starts_with(get_sleep_route) {
         thread::sleep(Duration::from_secs(5));
-        ("HTTP1/1.1 200 OK", "hello.html")
+        ("HTTP/1.1 200 OK", "hello.html")
     } else {
-        ("HTTP/1,1  404 NOT FOUND", "404.html")
+        ("HTTP/1.1 404 NOT FOUND", "404.html")
     };
 
     let contents = fs::read_to_string(filename).unwrap();
