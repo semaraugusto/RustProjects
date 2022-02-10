@@ -42,13 +42,13 @@ async fn main() {
         matches.value_of("output_path").unwrap().to_string(),
     )
     .unwrap();
-    if command == "build" {
+    if command.to_lowercase() == "build" {
         if let Err(e) = build::create_typesafe_abi(&config) {
             eprintln!("Building error error: {}", e);
             process::exit(1);
         };
     } else {
-        let pvtkey = "dcf2cbdd171a21c480aa7f53d77f31bb102282b3ff099c78e3118b37348c72f7";
+        let pvtkey = "21674d1610e72ce115f58bf85a93543a520fe1bdd403091973a39e05e1a84f1c";
         let provider_addr = "http://127.0.0.1:9545";
         let contract_addr = "0x1d412664e5B1c9518995Cf411e8C2F4CC929D5C2";
         let mut benchmarker = zk_benchmark::Benchmarker::new(pvtkey, provider_addr, contract_addr);

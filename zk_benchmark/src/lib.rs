@@ -19,11 +19,15 @@ impl Error for AbiError {}
 
 type SigningKey = ethers::core::k256::ecdsa::SigningKey;
 
-type ClientMiddleware = ethers::middleware::NonceManagerMiddleware<
-    ethers::middleware::SignerMiddleware<
-        ethers::providers::Provider<ethers::providers::Http>,
-        ethers::signers::Wallet<SigningKey>,
-    >,
+// type ClientMiddleware = ethers::middleware::NonceManagerMiddleware<
+//     ethers::middleware::SignerMiddleware<
+//         ethers::providers::Provider<ethers::providers::Http>,
+//         ethers::signers::Wallet<SigningKey>,
+//     >,
+// >;
+type ClientMiddleware = ethers::middleware::SignerMiddleware<
+    ethers::providers::Provider<ethers::providers::Http>,
+    ethers::signers::Wallet<SigningKey>,
 >;
 
 #[derive(Debug, Clone)]
@@ -48,9 +52,9 @@ fn setup_client(provider_addr: &str, wallet: MyWallet) -> Arc<ClientMiddleware> 
         .interval(Duration::from_millis(6u64));
     println!("provider: {:?}", provider);
 
+    println!();
     let client = SignerMiddleware::new(provider, wallet.pvtkey);
-    let client = NonceManagerMiddleware::new(client, wallet.pubkey);
-
+    println!("client: {:?}", client);
     Arc::new(client)
 }
 
@@ -94,14 +98,35 @@ impl Benchmarker {
             contract,
         }
     }
+
     pub async fn make_request(&mut self) {
         // let contract = ethers::contract::Contract::new(address, abi, client);
         if self.num_transactions > 10 {
             self.state = BenchmarkerState::Stopped;
         }
         println!();
-        let val = self.contract.hello_world().call().await.unwrap();
-        println!("contract: {:?}", val);
+        let contract_call = self.contract.hello_world();
+        println!("contract: {:?}", contract_call.tx);
+        let pending_tx = contract_call.send().await.unwrap();
+        std::thread::sleep(Duration::from_secs(2));
+        println!("pending_tx: {:?}", pending_tx);
+        let receipt = pending_tx.confirmations(1).await;
+        println!("contract: {:?}", receipt);
         self.num_transactions += 1;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Benchmarker;
+
+    #[tokio::test]
+    async fn test_send_eth() {
+        let pvtkey = "21674d1610e72ce115f58bf85a93543a520fe1bdd403091973a39e05e1a84f1c";
+        let provider_addr = "http://127.0.0.1:9545";
+        let contract_addr = "0x1d412664e5B1c9518995Cf411e8C2F4CC929D5C2";
+        let mut benchmarker = Benchmarker::new(pvtkey, provider_addr, contract_addr);
+
+        // benchmarker.send_eth().await;
     }
 }
