@@ -1,6 +1,6 @@
-pub use assemblysol_mod::*;
+pub use assembly_sol::*;
 #[allow(clippy::too_many_arguments)]
-mod assemblysol_mod {
+mod assembly_sol {
     #![allow(clippy::enum_variant_names)]
     #![allow(dead_code)]
     #![allow(clippy::type_complexity)]
