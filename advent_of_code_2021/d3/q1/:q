@@ -1,0 +1,32 @@
+fn main() {
+    let val: Vec<_> = include_str!("../test.in")
+        .lines()
+        .map(String::from)
+        .collect();
+
+    let max_len = val.iter().map(|v| v.len()).max().unwrap();
+    let majority: u32 = (val.len() / 2).try_into().unwrap();
+
+    println!("max_len {}", max_len);
+    let mut counts = vec![0; max_len as usize];
+
+    for idx in 0..max_len {
+        for v in val.iter() {
+            let bool_val = v.chars().nth(idx).unwrap().to_digit(2).unwrap();
+            counts[idx] += bool_val;
+        }
+    }
+    let mut gamma = 0;
+    let mut epsilon = 0;
+    for (i, c) in counts.iter().enumerate() {
+        if c > &majority {
+            gamma += 1 << (max_len - i - 1);
+        } else {
+            epsilon += 1 << (max_len - i - 1);
+        }
+    }
+
+    println!("{:?}", gamma);
+    println!("{:?}", epsilon);
+    println!("{:?}", gamma * epsilon);
+}
