@@ -1,3 +1,5 @@
+#![deny(clippy::infinite_iter)]
+
 extern crate queues;
 use queues::*;
 
@@ -14,9 +16,21 @@ fn main() {
 
     let mut counter = 0;
 
-    (1..=100).for_each(|round| {
-        counter += run_round(&mut map);
-    });
+    for round in 0.. {
+        let count_zeros = map.iter().fold(0, |outer_acc, row| {
+            outer_acc
+                + row
+                    .iter()
+                    .fold(0, |inner_acc, val| inner_acc + (*val == 0) as i32)
+        });
+
+        if count_zeros >= 100 {
+            counter = round;
+            break;
+        } else {
+            run_round(&mut map);
+        }
+    }
 
     println!("result: {:?}", counter);
 }
@@ -31,7 +45,7 @@ fn out_of_bounds(y: i32, x: i32, height: usize, width: usize) -> bool {
     y < 0 || y >= height as i32 || x < 0 || x >= width as i32
 }
 
-fn run_round(map: &mut [Vec<i32>]) -> i32 {
+fn run_round(map: &mut [Vec<i32>]) {
     let mut queue: Queue<(usize, usize)> = Queue::new();
 
     map.iter_mut()
@@ -47,7 +61,7 @@ fn run_round(map: &mut [Vec<i32>]) -> i32 {
 
     let mut visited: Vec<Vec<bool>> = vec![vec![false; map[0].len()]; map.len()];
 
-    recursive_flashing(&mut visited, map, &mut 0, &mut queue)
+    recursive_flashing(&mut visited, map, &mut 0, &mut queue);
 }
 
 fn recursive_flashing(

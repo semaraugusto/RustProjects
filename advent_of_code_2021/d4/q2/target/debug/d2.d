@@ -1,1 +1,0 @@
-/home/semar/Projects/RustProjects/advent_of_code_2021/d4/q2/target/debug/d2: /home/semar/Projects/RustProjects/advent_of_code_2021/d4/q2/src/main.rs /home/semar/Projects/RustProjects/advent_of_code_2021/d4/q2/test.in
