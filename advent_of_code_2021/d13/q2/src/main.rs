@@ -78,9 +78,9 @@ fn run_instruction(paper: &[Vec<char>], instr: &Instruction) -> Vec<Vec<char>> {
 
         for (idx, out_row) in output.iter_mut().enumerate() {
             for (jdx, out_val) in out_row.iter_mut().enumerate() {
-                let mut offset = instr.position as i64 * 2 - jdx as i64;
-                while offset as usize > paper[0].len() {
-                    offset -= 1;
+                let offset = instr.position as i64 * 2 - jdx as i64;
+                if offset >= paper[0].len() as i64 {
+                    continue;
                 }
                 let paper_val = paper[idx][offset as usize];
                 if paper_val == OCCUPIED {
