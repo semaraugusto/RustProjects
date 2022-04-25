@@ -5,7 +5,7 @@ struct Point {
 }
 
 const OCCUPIED: char = '█';
-const EMPTY: char = '.';
+const EMPTY: char = ' ';
 
 impl Point {
     fn new(line: &str) -> Point {
@@ -57,11 +57,10 @@ fn run_instruction(paper: &[Vec<char>], instr: &Instruction) -> Vec<Vec<char>> {
         // UP
         output = paper[..instr.position][..].to_vec();
 
-        let offset = paper.len() - 1;
         for (idx, out_row) in output.iter_mut().enumerate() {
-            let mut offset = (instr.position as i64 * 2 - idx as i64).abs() as usize;
-            while offset >= paper.len() {
-                offset -= 1;
+            let offset = (instr.position as i64 * 2 - idx as i64).abs() as usize;
+            if offset >= paper.len() {
+                continue;
             }
             for (jdx, out_val) in out_row.iter_mut().enumerate() {
                 let paper_val = paper[offset][jdx];
@@ -79,108 +78,39 @@ fn run_instruction(paper: &[Vec<char>], instr: &Instruction) -> Vec<Vec<char>> {
 
         for (idx, out_row) in output.iter_mut().enumerate() {
             for (jdx, out_val) in out_row.iter_mut().enumerate() {
-                let offset = instr.position as i64 * 2 - jdx as i64;
-                if offset < 0 {
-                    break;
+                let mut offset = instr.position as i64 * 2 - jdx as i64;
+                while offset as usize > paper[0].len() {
+                    offset -= 1;
                 }
                 let paper_val = paper[idx][offset as usize];
-                // let paper_val = paper[idx][offset as usize];
-                // println!("offset {}", offset - jdx);
                 if paper_val == OCCUPIED {
                     *out_val = OCCUPIED;
                 }
             }
         }
-
-        // for (out_row, paper_row) in output.iter_mut().zip(paper.iter()) {
-        //     for (out_val, paper_val) in out_row
-        //         .iter_mut()
-        //         .zip(paper_row[instr.position..].iter().rev())
-        //     {
-        //         if *paper_val == OCCUPIED {
-        //             *out_val = OCCUPIED;
-        //         }
-        //         // todo!();
-        //     }
-        // }
-        // println!("end output");
     }
     output
 }
-
-// fn run_instruction(paper: &[Vec<>], instr: &Instruction) -> Vec<Vec<char>> {
-//     // println!("INSTRUCTION {:?}", instr);
-//     let mut output: Vec<Vec<char>>;
-//     if instr.orientation == "y" {
-//         // UP
-//         output = paper[..instr.position][..].to_vec();
-//
-//         // println!("start output");
-//         for (out_row, paper_row) in output.iter_mut().zip(paper[instr.position..].iter().rev()) {
-//             for (o4ut_val, paper_val) in out_row.iter_mut().zip(paper_row.iter()) {
-//                 if *paper_val == OCCUPIED {
-//                     *out_val = OCCUPIED;
-//                 }
-//                 // todo!();
-//             }
-//         }
-//     } else {
-//         // LEFT
-//         output = paper
-//             .iter()
-//             .map(|row| row[..instr.position].to_vec())
-//             .collect::<Vec<Vec<char>>>();
-//
-//         for (out_row, paper_row) in output.iter_mut().zip(paper.iter()) {
-//             for (out_val, paper_val) in out_row.iter_mut().zip(paper_row.iter().rev()) {
-//                 if *paper_val == OCCUPIED {
-//                     *out_val = OCCUPIED;
-//                 }
-//                 // todo!();
-//             }
-//         }
-//         // println!("end output");
-//     }
-//     output
-// }
 
 fn main() {
     let (points, instructions) = parse_input();
     let max_x = points.iter().map(|point| point.x).max().unwrap() + 1;
     let max_y = points.iter().map(|point| point.y).max().unwrap() + 1;
-    let bounds = Point { x: max_x, y: max_y };
 
     let mut paper = vec![vec![EMPTY; max_x]; max_y];
 
     for point in &points {
         paper[point.y][point.x] = OCCUPIED;
     }
-    let result = paper.iter().fold(0, |outer_acc, row| {
-        outer_acc
-            + row
-                .iter()
-                .fold(0, |inner_acc, val| inner_acc + (*val == OCCUPIED) as u32)
-    });
 
     for instr in instructions {
         paper = run_instruction(&paper, &instr);
-        // print_matrix(&paper, Some(&instr));
-        // break;
-        // println!();
     }
-    // println!("END (y, x) ({}, {})", paper.len(), paper[0].len());
-    let result = paper.iter().fold(0, |outer_acc, row| {
-        outer_acc
-            + row
-                .iter()
-                .fold(0, |inner_acc, val| inner_acc + (*val == OCCUPIED) as u32)
-    });
     print_matrix(&paper, None);
 }
 
 fn print_matrix(mat: &Vec<Vec<char>>, instr: Option<&Instruction>) {
-    println!("instruction {:?}", instr);
-    for (i, m) in mat.iter().enumerate() {
+    for m in mat.iter() {
         // println!("{} {}", i, m);
         m.iter().for_each(|x| print!("{}", x));
         println!();
