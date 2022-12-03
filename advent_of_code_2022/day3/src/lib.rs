@@ -17,14 +17,7 @@ fn solve_part1(input: &str) -> u32 {
         }
 
         match common {
-            Some(x) => {
-                if x.is_uppercase() {
-                    result += x as u32 - 'A' as u32 + 27;
-                } else {
-                    result += x as u32 - 'a' as u32 + 1;
-                }
-                // result += x
-            }
+            Some(x) => result += get_priority(x),
             None => unreachable!("nice input my guy"),
         };
         println!("{:?}", result);
@@ -56,26 +49,17 @@ fn solve_part2(input: &str) -> u32 {
         .chunks(3)
     {
         let group0 = make_set(group[0]);
-        // println!("{:?}", group0);
         let group1 = make_set(group[1]);
-        // println!("{:?}", group1);
         let group2 = make_set(group[2]);
-        // println!("{:?}", group2);
         for elem in group0.iter() {
             if group1.contains(elem) && group2.contains(elem) {
-                println!("{:?}", elem);
                 let result = get_priority(*elem);
                 results.push(result);
             }
         }
-        // match result {
-        //     Some(result) => result,
-        //     None => unreachable!("failed"),
-        // }
     }
     println!("results = {:?}", results.iter().sum::<u32>());
     results.iter().sum::<u32>()
-    // result
 }
 
 #[cfg(test)]
@@ -113,6 +97,6 @@ CrZsJsPPZsGzwwsLwLmpwMDw";
     fn test_part2_2() {
         let input = include_str!("../input.txt");
         let result = solve_part2(input);
-        assert_eq!(result, 70);
+        assert_eq!(result, 2525);
     }
 }
